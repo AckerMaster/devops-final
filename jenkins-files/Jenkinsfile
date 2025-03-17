@@ -1,0 +1,68 @@
+
+pipeline {
+    agent any
+    
+    // i changed the env vars for convinience 
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('docker-hub-creds') // Must be configured in Jenkins
+        DOCKER_REGISTRY = 'ackermaster'
+        IMAGE_NAME = 'flask-aws-monitor'
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+    }
+    
+    stages {
+
+        stage('Clone Repository') {
+            steps {
+                git branch: 'feature3-python', url: 'https://github.com/AckerMaster/devops-final.git'
+                }
+        }
+        
+        stage('Parallel Checks') {
+           
+                stage('Linting') {
+                    steps {
+                        echo 'MOCKING linting steps for Python, Shell, and Dockerfile'
+                    }
+                }
+                stage('Security Scan') {
+                    steps {
+                        echo 'MOCKING security scanning steps for dependencies and container security'
+                    }
+                }
+            
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                dir('python-files') {
+                    script {
+                        sh 'docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .'
+                        sh 'docker tag ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest'
+                    }
+                }
+            }
+
+        }
+        
+        stage('Push to Docker Hub') {
+            steps {
+                 sh '''
+                    echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
+                    docker push ${DOCKER_REGISTRY}/${REPO_NAME}:${IMAGE_TAG}
+                    docker push ${DOCKER_REGISTRY}/${REPO_NAME}:latest
+                '''
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed! Check logs for details.'
+        }
+    }
+
+}
