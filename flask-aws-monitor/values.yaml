@@ -1,0 +1,17 @@
+replicaCount: 1
+
+image:
+  repository: ackermaster/flask-aws-monitor
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 5001
+
+aws:
+  region: "us-east-1"
+  
+# the aws credential i used in the CLI
+secretName: aws-credentials
