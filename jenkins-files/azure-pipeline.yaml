@@ -17,7 +17,7 @@ stages:
   - job: Clone
     steps:
     - checkout: self
-      ref: feature3-python # TODO: change to main after making sure all works 
+      
 - stage: ParallelChecks
   displayName: 'Parallel Linting & Security Checks'
   dependsOn: CloneRepository
