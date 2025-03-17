@@ -32,14 +32,14 @@ pipeline {
                 stage('Linting') {
                     steps {
                         dir('python-files') {
-                            sh 'flake8 app.py' || true
+                            sh 'flake8 app.py || true'
                         }
                     }
                 }
                 stage('Security Scan') {
                     steps {
                         dir('python-files') {
-                            sh 'bandit app.py'|| true
+                            sh 'bandit app.py|| true'
                         }
                     }
                 }
