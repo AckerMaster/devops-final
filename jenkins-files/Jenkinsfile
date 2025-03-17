@@ -1,8 +1,6 @@
-
 pipeline {
     agent any
     
-    // i changed the env vars for convinience 
     environment {
         DOCKERHUB_CREDENTIALS = credentials('docker-hub-creds') // Must be configured in Jenkins
         DOCKER_REGISTRY = 'ackermaster'
@@ -11,15 +9,14 @@ pipeline {
     }
     
     stages {
-
         stage('Clone Repository') {
             steps {
                 git branch: 'feature3-python', url: 'https://github.com/AckerMaster/devops-final.git'
-                }
+            }
         }
         
         stage('Parallel Checks') {
-           
+            parallel {
                 stage('Linting') {
                     steps {
                         echo 'MOCKING linting steps for Python, Shell, and Dockerfile'
@@ -30,27 +27,24 @@ pipeline {
                         echo 'MOCKING security scanning steps for dependencies and container security'
                     }
                 }
-            
+            }
         }
         
         stage('Build Docker Image') {
             steps {
                 dir('python-files') {
-                    script {
-                        sh 'docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .'
-                        sh 'docker tag ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest'
-                    }
+                    sh 'docker build -t ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} .'
+                    sh 'docker tag ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest'
                 }
             }
-
         }
         
         stage('Push to Docker Hub') {
             steps {
-                 sh '''
+                sh '''
                     echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin
-                    docker push ${DOCKER_REGISTRY}/${REPO_NAME}:${IMAGE_TAG}
-                    docker push ${DOCKER_REGISTRY}/${REPO_NAME}:latest
+                    docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                    docker push ${DOCKER_REGISTRY}/${IMAGE_NAME}:latest
                 '''
             }
         }
@@ -64,5 +58,4 @@ pipeline {
             echo 'Pipeline failed! Check logs for details.'
         }
     }
-
 }
