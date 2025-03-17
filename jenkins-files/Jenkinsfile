@@ -14,17 +14,28 @@ pipeline {
                 git branch: 'feature3-python', url: 'https://github.com/AckerMaster/devops-final.git'
             }
         }
+
+        stage('Install Linting and Security Tools') {
+            steps {
+                sh 'python3 -m pip install flake8 bandit'
+                sh 'apt-get update'
+            }
+        }
         
         stage('Parallel Checks') {
             parallel {
                 stage('Linting') {
                     steps {
-                        echo 'MOCKING linting steps for Python, Shell, and Dockerfile'
+                        dir('python-files') {
+                            sh 'flake8 app.py'
+                        }
                     }
                 }
                 stage('Security Scan') {
                     steps {
-                        echo 'MOCKING security scanning steps for dependencies and container security'
+                        dir('python-files') {
+                            sh 'bandit app.py'
+                        }
                     }
                 }
             }
