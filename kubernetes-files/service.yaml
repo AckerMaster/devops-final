@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: aws-monitor-service-lb
+spec:
+  selector:
+    app: aws-monitor
+  ports:
+  - port: 80
+    targetPort: 5001
+  type: LoadBalancer
