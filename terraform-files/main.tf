@@ -34,6 +34,14 @@ resource "aws_security_group" "liad_security_group_id" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # allow port 8080 (for jenkins)
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # this allows ping
   ingress {
     from_port   = -1
