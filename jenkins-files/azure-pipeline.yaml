@@ -2,18 +2,14 @@ trigger:
   branches:
     include:
       - feature3-python
-
 pool:
   vmImage: 'ubuntu-latest'
-
 variables:
   # stored both in azure devops secrets
   DOCKERHUB_USERNAME: $(DOCKERHUB_USERNAME)  
   DOCKERHUB_PASSWORD: $(DOCKERHUB_PASSWORD) 
-
   IMAGE_NAME: 'ackermaster/flask-aws-monitor-azure'
   IMAGE_TAG: $(Build.BuildId)
-
 stages:
 - stage: CloneRepository
   displayName: 'Clone Repository'
@@ -22,7 +18,6 @@ stages:
     steps:
     - checkout: self
       ref: feature3-python # TODO: change to main after making sure all works 
-
 - stage: ParallelChecks
   displayName: 'Parallel Linting & Security Checks'
   dependsOn: CloneRepository
@@ -34,7 +29,6 @@ stages:
     - script: |
         echo "Running linting for Python, Shell, and Dockerfile"
       displayName: 'Run Linting'
-
   - job: SecurityScan
     displayName: 'Security Scanning'
     steps:
@@ -42,20 +36,18 @@ stages:
     - script: |
         echo "Running security scanning for dependencies and container security"
       displayName: 'Run Security Scan'
-
 # building the correct image based on our app
 - stage: BuildDockerImage
   displayName: 'Build Docker Image'
-  dependsOn: CloneRepository
+  dependsOn: ParallelChecks
   jobs:
   - job: BuildImage
     steps:
-  - script: |
-      cd python-files
-      docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
-      docker tag $(IMAGE_NAME):$(IMAGE_TAG) $(IMAGE_NAME):latest
-    displayName: 'Build and Tag Docker Image'
-
+    - script: |
+        cd python-files
+        docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+        docker tag $(IMAGE_NAME):$(IMAGE_TAG) $(IMAGE_NAME):latest
+      displayName: 'Build and Tag Docker Image'
 # logining to dockerhub using the creds and pushing the image
 - stage: PushToDockerHub
   displayName: 'Push Docker Image to Docker Hub'
@@ -68,7 +60,6 @@ stages:
         docker push $(IMAGE_NAME):$(IMAGE_TAG)
         docker push $(IMAGE_NAME):latest
       displayName: 'Push Docker Image to Docker Hub'
-
 - stage: SecureCredentials
   displayName: 'Store and Use Secure Credentials'
   dependsOn: []  
